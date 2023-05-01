@@ -41,7 +41,7 @@ export const logout = async () => {
 
 export const checkAuth = async () => {
     try {
-        const response = await axios.get<AuthResponse>(`${API_URL}/refresh`, {withCredentials: true})
+        const response = await axios.get<AuthResponse>(`${API_URL}refresh`, {withCredentials: true})
         localStorage.setItem('token', response.data.accessToken)
         return response
     } catch (e:any) {

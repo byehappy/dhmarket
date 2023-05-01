@@ -17,7 +17,7 @@ class TokenService {
             .select('*')
             .from('customers')
             .joinRaw('left join customer_tokens as token ON token.customer_id = customers.id', [])
-            .where('customers.id', customerId);
+            .where('customer_id', customerId);
 
         await tokens.some(async function(currentObject) {
             if (currentObject.token !== 0 || currentObject.token !== undefined || currentObject.token !== '') {

@@ -51,7 +51,7 @@ router.post("/registration", body('email').isEmail(), body('password').isLength(
             password: hashedPassword,
             name: req.body.name,
             address: req.body.address,
-            phone_number: req.body.number
+            phone_number: req.body.phone_number
         })
         const currentUser = await knex
             .select('email', 'id')

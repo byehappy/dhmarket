@@ -97,9 +97,10 @@ export const UserCont = styled.div`
   text-align: right;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
 `
 export const UserText =styled.div`
-  font-size: 1vw;
+  font-size: .9vw;
   color: #424242;
   text-wrap: none;
 `
@@ -112,5 +113,5 @@ export const UserButton= styled.button`
   color: gray;
   text-decoration-line: underline;
   padding: 0 0 0 0;
-  width: 5vw;
+  width: 3vw;
 `

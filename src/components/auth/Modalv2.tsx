@@ -11,9 +11,10 @@ import {
     PictureLeft
 } from "./Modal.style";
 import Right from '../images/right-picture.svg'
-import Left from '../images/left-picutre.svg'
+import Left from '../images/left-picture.svg'
 import logo from '../images/logo_for_auth.svg'
 import AuthForm from "./authForm";
+import RegForm from "./regForm";
 
 const modalRootElement: any = document.querySelector('#portal')
 
@@ -48,13 +49,16 @@ const Modal = (props: any) => {
                             </ButtonCont>
                         </HeadCont>
                             <AuthForm onClose={onClose}/>
-                        </>) : (<HeadCont>
+                        </>) : (
+                            <><HeadCont>
                             <Logo src={logo}/>
                             <ButtonCont>
                                 Есть аккаунт?
                                 <SwapButton onClick={() => setAuthForm(true)}>Войти</SwapButton>
                             </ButtonCont>
-                        </HeadCont>)}
+                        </HeadCont>
+                                <RegForm/>
+                            </>)}
                     </ContainerItem>
                     {authForm ? <PictureRight src={Right}/> : <PictureLeft src={Left}/>}
 

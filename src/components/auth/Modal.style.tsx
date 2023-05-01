@@ -57,6 +57,7 @@ export const SwapButton = styled.button`
   text-decoration: #61dafb;
   text-decoration-line: underline;
   text-align: right;
+  padding-top: .3vw;
 `
 export const Logo = styled.img`
   z-index: 999;
@@ -82,6 +83,7 @@ export const EmailCont = styled.div`
 
   .ErrorMessages {
     color: red;
+    font-size: 1vw;
   }
 `
 export const Email = styled.input`
@@ -104,6 +106,7 @@ export const PasswordCont = styled.div`
 
   .ErrorMessages {
     color: red;
+    font-size: 1vw;
   }
 `
 export const Password = styled.input`
@@ -130,4 +133,27 @@ export const Submit = styled.button`
   width: 10vw;
   height: 2.8vw;
   border-radius: 1vw;
+`
+export const NameCont = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  font-family: Arimo;
+  font-size: 1.2vw;
+  margin-top: .8vw;
+
+  .ErrorMessages {
+    color: red;
+    font-size: 1vw;
+  }
+`
+export const Name = styled.input`
+  background: white;
+  border: .1vw solid #9f9f9f;
+  border-radius: .5vw;
+  width: 34vw;
+  height: 2.5vw;
+  padding-left: .6vw;
+  margin-top: .5vw;
+  font-family: Rubik;
+  font-size: 1vw;
 `

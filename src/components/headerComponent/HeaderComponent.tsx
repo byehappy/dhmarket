@@ -12,14 +12,15 @@ import {
 import logo from '../images/logo.svg'
 import loop from '../images/loop.svg'
 import cart from '../images/cart.svg'
-import {NavLink} from "react-router-dom";
+import {NavLink, useNavigate} from "react-router-dom";
 import Dropdown from "../catalogHeaderButton/Catalog";
 import profile from "../images/profile.svg";
 import {BasicButton} from "../auth/Modal.style";
 import React, {useState} from "react";
 import Modal from "../auth/Modalv2";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {IUser} from "../../interfaces/BasicInterface";
+import {loginUser, logout, setAuth} from "../../actions/actions";
 
 type CurrentUser = {
     curUser: IUser;
@@ -28,7 +29,8 @@ type CurrentUser = {
 const HeaderComponent = () => {
     const [isOpen, setIsOpen] = useState(false);
     const {curUser, isAuth} = useSelector((state: CurrentUser) => state)
-
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
     const handleOpenModal = () => {
         setIsOpen(true);
     }
@@ -65,7 +67,11 @@ const HeaderComponent = () => {
                         <>
                             <UserCont>
                                 <UserText>Приятно вас видеть! {curUser.name}</UserText>
-                                <UserButton>Выйти</UserButton>
+                                <UserButton onClick={() => logout().then(() => {
+                                    navigate('/')
+                                    dispatch(setAuth(false))
+                                    dispatch(loginUser({} as IUser))
+                                })}>Выйти</UserButton>
                             </UserCont>
                             <BasicButton>
                                 <Icon src={profile}/>
@@ -78,7 +84,7 @@ const HeaderComponent = () => {
                             </BasicButton>
                             {isOpen && <Modal open={isOpen} onClose={handleCloseModal}/>}
                         </>}
-                    <NavLink to={'/cart'}>
+                    <NavLink style={{display: "flex", alignContent: "center", flexWrap: "wrap"}} to={'/cart'}>
                         <Icon src={cart}/>
                     </NavLink>
                 </BasicButtonsContainer>

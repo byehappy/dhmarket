@@ -1,10 +1,9 @@
 import React, {useState} from "react";
-import {ProductCardContainer, ProductImage, ProductRating, ProductPrice, ProductButtonsContainer, ProductName} from './CardProduct.style'
+import {ProductCardContainer, ProductImage, ProductRating, ProductPrice, ProductButtonsContainer, ProductName,Text} from './CardProduct.style'
 import cart from '../images/cartbutton.svg'
 import srav from '../images/srav.svg'
-import {Products} from "../../interfaces/BasicInterface";
 const StarIcon = () => (
-    <svg viewBox="0 0 24 24">
+    <svg viewBox="0 0 26 31">
         <path
             fill="none"
             d="M0 0h24v24H0z"
@@ -26,8 +25,8 @@ const ProductCard = ({image_url, name, price, rating, votes}:any) => {
             <ProductName>{name}</ProductName>
             <ProductPrice>${price}</ProductPrice>
             {hovered ? (
-                <ProductButtonsContainer className="product-buttons">
-                    <button>Buy</button>
+                <ProductButtonsContainer>
+                    <button><Text>Buy</Text></button>
                     <button><img src={srav}/></button>
                     <button><img src={cart}/></button>
                 </ProductButtonsContainer>
