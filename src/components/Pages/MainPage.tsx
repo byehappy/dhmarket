@@ -1,13 +1,13 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect} from "react";
 import partners from '../images/partners.png'
 import {Partners} from "../carousel/Carousel.style";
 import MyPage from "../carousel/PageCarousel";
 import ProductCard from "../cardProduct/CardProduct";
 import styled from "styled-components";
-import {Product} from "../../interfaces/BasicInterface";
 import Novetly from "../novelty/Novetly";
-
-
+import ProductsService from "../../services/ProductServices";
+import {useDispatch, useSelector} from 'react-redux';
+import {productsFetched} from "../../actions/actions";
 
 const BstSel = styled.div`
   font-family: 'Arimo';
@@ -23,37 +23,43 @@ const ProductsContainer = styled.div`
 `;
 
 const MainPage = () => {
-    const [products, setProducts] = useState<Product[]>([]);
+    const {products}: any = useSelector(state => state)
+    const {getProducts} = ProductsService()
+    const dispatch = useDispatch()
+    const BestSellProducts = useCallback(async () => {
+         getProducts().then((data) => {
+            dispatch(productsFetched(data.data))
+        })
+    }, [])
 
     useEffect(() => {
-        fetch("http://localhost:3001/products/top")
-            .then((response) => response.json())
-            .then((data) => setProducts(data))
-            .catch((error) => console.error(error));
+        BestSellProducts()
     }, []);
 
+    function renderItems(products: object[]) {
+        return products.map(({...props}, id) => {
+                return (<ProductCard key={id} {...props} />)
+            }
+        )
+    }
+
+    const elements = renderItems(products)
     return (
         <div>
             <MyPage/>
             <Partners src={partners}/>
             <BstSel>Best Seller</BstSel>
             <ProductsContainer>
-                {products.map((product) => (
-                    <ProductCard key={product.id} {...product} />
-                ))}
+                {elements}
             </ProductsContainer>
             <Novetly/>
             <BstSel>Best Seller</BstSel>
             <ProductsContainer>
-                {products.map((product) => (
-                    <ProductCard key={product.id} {...product} />
-                ))}
+                {elements}
             </ProductsContainer>
             <BstSel>Best Seller</BstSel>
             <ProductsContainer>
-                {products.map((product) => (
-                    <ProductCard key={product.id} {...product} />
-                ))}
+                {elements}
             </ProductsContainer>
         </div>
     )

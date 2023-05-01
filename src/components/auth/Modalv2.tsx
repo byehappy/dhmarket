@@ -1,29 +1,25 @@
 import {createPortal} from "react-dom";
-import React, {useEffect, useRef} from "react";
-import {Formik, Form, Field, ErrorMessage} from 'formik';
-import * as Yup from 'yup';
+import React, {useEffect, useRef, useState} from "react";
 import {
     ButtonCont,
     Container,
     ContainerItem,
-    Email,
-    EmailCont,
-    H1,
     HeadCont,
     Logo,
-    Password,
-    PasswordCont,
-    Picture,
-    Submit,
-    SwapButton
+    PictureRight,
+    SwapButton,
+    PictureLeft
 } from "./Modal.style";
-import right from '../images/right-picture.svg'
+import Right from '../images/right-picture.svg'
+import Left from '../images/left-picutre.svg'
 import logo from '../images/logo_for_auth.svg'
+import AuthForm from "./authForm";
 
 const modalRootElement: any = document.querySelector('#portal')
 
 const Modal = (props: any) => {
     const {open, onClose} = props;
+    const [authForm, setAuthForm] = useState<boolean>(true)
     const ref = useRef() as React.MutableRefObject<HTMLInputElement>;
 
     useEffect(() => {
@@ -39,81 +35,30 @@ const Modal = (props: any) => {
             document.removeEventListener('scroll', checkOutside)
         }
     }, [onClose]);
-
-    const initialValues = {
-        email: '',
-        password: '',
-    };
-
-    const validationSchema = Yup.object({
-        email: Yup.string().email('Неверный формат email').required('Это поле обязательно для заполнения'),
-        password: Yup.string().required('Это поле обязательно для заполнения'),
-    });
-
-    const handleSubmit = (values: any, {setSubmitting}: any) => {
-        // отправить данные на сервер для проверки
-        fetch('http://localhost:3001/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(values),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                // если пользователь авторизован успешно
-                console.log('Вы успешно вошли в систему!', data);
-                onClose(); // закрыть модальное окно
-            })
-            .catch((error) => {
-                console.log('Ошибка авторизации!', error);
-            })
-            .finally(() => {
-                setSubmitting(false);
-            });
-    };
-
     return createPortal(
         <>
             {open ? (
-                <Container>
-                    <ContainerItem ref={ref}>
-                        <HeadCont>
+                <Container AuthForm={authForm}>
+                    <ContainerItem AuthForm={authForm} ref={ref}>
+                        {authForm ? (<><HeadCont>
                             <Logo src={logo}/>
                             <ButtonCont>
                                 Нет аккаунта?
-                                <SwapButton>Зарегистрироваться</SwapButton>
+                                <SwapButton onClick={() => setAuthForm(false)}>Зарегистрироваться</SwapButton>
                             </ButtonCont>
                         </HeadCont>
-                        <H1>Вход в аккаунт</H1>
-                        <Formik initialValues={initialValues} validationSchema={validationSchema}
-                                onSubmit={handleSubmit}>
-                            {({isSubmitting}) => (
-                                <Form>
-                                    <EmailCont>
-                                        Адрес электронной почты
-                                        <Field type="email" name="email" as={Email}/>
-                                        <ErrorMessage name="email" component="div" className="error"/>
-                                    </EmailCont>
-                                    <PasswordCont>
-                                        Пароль
-                                        <Field type="password" name="password" as={Password}/>
-                                        <ErrorMessage name="password" component="div" className="error"/>
-                                    </PasswordCont>
-                                    <Submit type="submit" disabled={isSubmitting}>
-                                        {isSubmitting ? 'Загрузка...' : 'Войти'}
-                                    </Submit>
-                                </Form>
-                            )}
-                        </Formik>
+                            <AuthForm onClose={onClose}/>
+                        </>) : (<HeadCont>
+                            <Logo src={logo}/>
+                            <ButtonCont>
+                                Есть аккаунт?
+                                <SwapButton onClick={() => setAuthForm(true)}>Войти</SwapButton>
+                            </ButtonCont>
+                        </HeadCont>)}
                     </ContainerItem>
-                    <Picture src={right}/>
-                </Container> ): null}
+                    {authForm ? <PictureRight src={Right}/> : <PictureLeft src={Left}/>}
+
+                </Container>) : null}
         </>
         , modalRootElement);
 }

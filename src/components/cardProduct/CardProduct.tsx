@@ -2,9 +2,7 @@ import React, {useState} from "react";
 import {ProductCardContainer, ProductImage, ProductRating, ProductPrice, ProductButtonsContainer, ProductName} from './CardProduct.style'
 import cart from '../images/cartbutton.svg'
 import srav from '../images/srav.svg'
-import {Product} from "../../interfaces/BasicInterface";
-
-
+import {Products} from "../../interfaces/BasicInterface";
 const StarIcon = () => (
     <svg viewBox="0 0 24 24">
         <path
@@ -17,14 +15,7 @@ const StarIcon = () => (
     </svg>
 );
 
-const ProductCard: React.FC<Product> = (
-    {
-        image_url,
-        name,
-        price,
-        rating,
-        votes,
-    }) => {
+const ProductCard = ({image_url, name, price, rating, votes}:any) => {
     const [hovered, setHovered] = useState(false);
     return (
         <ProductCardContainer

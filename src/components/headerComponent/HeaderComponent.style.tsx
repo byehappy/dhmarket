@@ -93,3 +93,24 @@ export const ButtonCont =styled.div`
   display: flex;
   margin-left: 1vw;
 `
+export const UserCont = styled.div`
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+`
+export const UserText =styled.div`
+  font-size: 1vw;
+  color: #424242;
+  text-wrap: none;
+`
+export const UserButton= styled.button`
+  outline: none;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 1vw;
+  color: gray;
+  text-decoration-line: underline;
+  padding: 0 0 0 0;
+  width: 5vw;
+`

@@ -1,5 +1,8 @@
 import styled from "styled-components";
-import exp from "constants";
+
+interface ContainerProps {
+    AuthForm: boolean;
+}
 
 export const BasicButton = styled.button`
   outline: none;
@@ -7,8 +10,7 @@ export const BasicButton = styled.button`
   cursor: pointer;
   border: none;
 `
-
-export const Container = styled.div`
+export const Container = styled.div<ContainerProps>`
   display: flex;
   position: absolute;
   z-index: 998;
@@ -18,19 +20,24 @@ export const Container = styled.div`
   right: 0;
   left: 0;
   background: rgba(227, 217, 231);
+  flex-direction: ${({AuthForm}: any) => AuthForm ? 'row' : 'row-reverse'};
 `
-export const ContainerItem = styled.div`
-  margin: auto auto 10vw auto;
+export const ContainerItem = styled.div<ContainerProps>`
+  margin: ${({AuthForm}: any) => AuthForm ? 'auto' : '2vw'} auto 10vw auto;
   padding: 2vw;
   width: 35vw;
-  height: 37vw;
+  height: ${({AuthForm}: any) => AuthForm ? '37vw' : '45vw'};
   background: whitesmoke;
   border-radius: 2vw;
-  box-shadow: 0 0 2vw rgba(0,0,0,0.25);
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.25);
 `
-export const Picture = styled.img`
+export const PictureRight = styled.img`
   width: 25vw;
-  margin-right:10vw ;
+  margin-right: 10vw;
+`
+export const PictureLeft = styled.img`
+  width: 30vw;
+  margin-left: 10vw;
 `
 export const ButtonCont = styled.div`
   font-family: 'Rubik';
@@ -45,10 +52,11 @@ export const SwapButton = styled.button`
   border: none;
   outline: none;
   background: none;
-  cursor:pointer;
+  cursor: pointer;
   color: #4F6BFF;
   text-decoration: #61dafb;
   text-decoration-line: underline;
+  text-align: right;
 `
 export const Logo = styled.img`
   z-index: 999;
@@ -71,6 +79,10 @@ export const EmailCont = styled.div`
   font-family: Arimo;
   font-size: 1.2vw;
   margin-top: .8vw;
+
+  .ErrorMessages {
+    color: red;
+  }
 `
 export const Email = styled.input`
   background: white;
@@ -89,6 +101,10 @@ export const PasswordCont = styled.div`
   font-family: Arimo;
   font-size: 1.2vw;
   margin-top: .8vw;
+
+  .ErrorMessages {
+    color: red;
+  }
 `
 export const Password = styled.input`
   background: white;

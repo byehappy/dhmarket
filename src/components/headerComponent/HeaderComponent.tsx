@@ -7,20 +7,27 @@ import {
     LogoText,
     SearchContainer,
     SearchIcon,
-    SearchInput
+    SearchInput, UserButton, UserCont, UserText
 } from "./HeaderComponent.style";
 import logo from '../images/logo.svg'
 import loop from '../images/loop.svg'
 import cart from '../images/cart.svg'
 import {NavLink} from "react-router-dom";
-import Dropdown from "../catalogHeader/Catalog";
+import Dropdown from "../catalogHeaderButton/Catalog";
 import profile from "../images/profile.svg";
 import {BasicButton} from "../auth/Modal.style";
 import React, {useState} from "react";
 import Modal from "../auth/Modalv2";
+import {useSelector} from "react-redux";
+import {IUser} from "../../interfaces/BasicInterface";
 
-const HeaderComponent = ()=>{
+type CurrentUser = {
+    curUser: IUser;
+    isAuth: boolean;
+}
+const HeaderComponent = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const {curUser, isAuth} = useSelector((state: CurrentUser) => state)
 
     const handleOpenModal = () => {
         setIsOpen(true);
@@ -29,42 +36,48 @@ const HeaderComponent = ()=>{
     const handleCloseModal = () => {
         setIsOpen(false);
     }
-    const categories = [
-        {
-            name: 'Digital',
-            subcategories: ['Computers & Tablets', 'TV & Video', 'Audio', 'Smart Home', 'Cameras & Camcorders'],
-        },
-        {
-            name: 'Household',
-            subcategories: ['Appliances', 'Furniture', 'Home Decor', 'Kitchen & Dining', 'Bedding & Bath'],
-        },
-    ];
-    return(
+
+    return (
         <Container>
             <ContainOne>
                 <Buttons to={'/'}>
-                <Logo src={logo}/>
-                <LogoText>
-                    Digital
-                    Household
-                    market
-                </LogoText>
+                    <Logo src={logo}/>
+                    <LogoText>
+                        Digital
+                        Household
+                        market
+                    </LogoText>
                 </Buttons>
                 <ButtonCont>
-                <Buttons to={'/about-us'}>
-                    About us
-                </Buttons>
-                <Buttons to={'/blog'}>
-                    Blog
-                </Buttons>
-                <Buttons to={'/news'}>
-                    News
-                </Buttons>
+                    <Buttons to={'/about-us'}>
+                        About us
+                    </Buttons>
+                    <Buttons to={'/blog'}>
+                        Blog
+                    </Buttons>
+                    <Buttons to={'/news'}>
+                        News
+                    </Buttons>
                 </ButtonCont>
                 <SearchContainer><SearchInput/><SearchIcon src={loop}/></SearchContainer>
                 <BasicButtonsContainer>
-                    <BasicButton onClick={handleOpenModal}><Icon src={profile}/></BasicButton>
-                    {isOpen && <Modal open={isOpen} onClose={() => setIsOpen(false)}/>}
+                    {isAuth && curUser ?
+                        <>
+                            <UserCont>
+                                <UserText>Приятно вас видеть! {curUser.name}</UserText>
+                                <UserButton>Выйти</UserButton>
+                            </UserCont>
+                            <BasicButton>
+                                <Icon src={profile}/>
+                            </BasicButton>
+                        </>
+                        :
+                        <>
+                            <BasicButton onClick={handleOpenModal}>
+                                <Icon src={profile}/>
+                            </BasicButton>
+                            {isOpen && <Modal open={isOpen} onClose={handleCloseModal}/>}
+                        </>}
                     <NavLink to={'/cart'}>
                         <Icon src={cart}/>
                     </NavLink>
