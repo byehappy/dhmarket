@@ -5,7 +5,10 @@ const initialState:states = {
     products:[],
     product:[],
     curUser: {} as IUser,
-    isAuth: false
+    isAuth: false,
+    filter:[],
+    filters:{},
+    isAdmin:false
 }
 
 function mainReducer(state = initialState,action:any){
@@ -35,6 +38,23 @@ function mainReducer(state = initialState,action:any){
                 loadingStatus: 'idle',
                 isAuth: action.payload
             }
+        case 'SET_ADMIN':
+            return {
+                ...state,
+                loadingStatus: 'idle',
+                isAdmin: action.payload
+            }
+        case 'Filter_Fetched':
+            return{
+                ...state,
+                status: 'idle',
+                filter:action.filter
+            }
+        case 'UPDATE_FILTERS':
+            return {
+                ...state,
+                filters: action.payload
+            };
         default: return state
     }
 }

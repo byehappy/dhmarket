@@ -10,7 +10,7 @@ import {Formik, Form, Field, ErrorMessage} from 'formik';
 import * as Yup from "yup";
 import AuthService from "../../services/AuthServices";
 import {useDispatch} from "react-redux";
-import {loginUser, setAuth} from "../../actions/actions";
+import {loginUser, setAdmin, setAuth} from "../../actions/actions";
 
 const AuthForm = ({onClose}:any) => {
     const {login} =AuthService()
@@ -32,6 +32,8 @@ const AuthForm = ({onClose}:any) => {
             localStorage.setItem('token', response.data.accessToken)
             dispatch(loginUser(response.data.user))
             dispatch(setAuth(true))
+            if (response.data.user.admin)
+                dispatch(setAdmin(true))
             onClose()
         } catch (e:any) {
             console.log(e.response?.data?.message)

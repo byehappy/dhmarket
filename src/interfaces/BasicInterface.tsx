@@ -24,7 +24,10 @@ export type states = {
     products:Products[];
     product:Product[];
     curUser: IUser;
-    isAuth: boolean
+    isAuth: boolean;
+    filter:Filter[],
+    filters:{},
+    isAdmin:boolean
 }
 
 export interface AuthResponse {
@@ -34,8 +37,16 @@ export interface AuthResponse {
 }
 
 export interface IUser {
+    admin: boolean;
     email: string;
     id: string;
     name: string;
     address: string;
+}
+export interface Categories{
+    category_id:number;
+    category_name:string;
+}
+export interface Filter{
+    [key: string]: string[];
 }

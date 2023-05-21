@@ -14,7 +14,7 @@ const cookieParser = require('cookie-parser')
 
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}))
+app.use(cors({credentials: true, origin: 'http://localhost:3000',exposedHeaders:['Content-Range', 'X-Content-Range']}))
 app.use("/api", controller);
 // app.use(errorMiddleware)
 

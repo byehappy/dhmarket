@@ -47,23 +47,23 @@ const Dropdown = () => {
                     <DropdownLink onClick={() => handleCategoryClick("Category 1")}>Digital technology</DropdownLink>
                     {selectedCategory === "Category 1" && (
                         <DropdownSubLinkWrapper>
-                            <DropdownSubLink href="/laptops">Laptops</DropdownSubLink>
-                            <DropdownSubLink href="/desktops">Desktops</DropdownSubLink>
-                            <DropdownSubLink href="/tablets">Tablets</DropdownSubLink>
-                            <DropdownSubLink href="/computer-accessories">Computer Accessories</DropdownSubLink>
-                            <DropdownSubLink href="/monitors">Monitors</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Laptops">Laptops</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Desktops">Desktops</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Tablets">Tablets</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Computer Accessories">Computer Accessories</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Monitors">Monitors</DropdownSubLink>
                         </DropdownSubLinkWrapper>
                     )}
                 </DropdownLinkWrapper>
                 <DropdownLinkWrapper>
-                    <DropdownLink onClick={() => handleCategoryClick("Category 2")}>Household appliancesы</DropdownLink>
+                    <DropdownLink onClick={() => handleCategoryClick("Category 2")}>Household appliances</DropdownLink>
                     {selectedCategory === "Category 2" && (
                         <DropdownSubLinkWrapper>
-                            <DropdownSubLink href="/tvs">TVs</DropdownSubLink>
-                            <DropdownSubLink href="/vacuum-cleaner">Vacuum cleaner</DropdownSubLink>
-                            <DropdownSubLink href="/fridge">Fridge</DropdownSubLink>
-                            <DropdownSubLink href="/ironing">Ironing</DropdownSubLink>
-                            <DropdownSubLink href="/washing-machine">Washing machine</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/TVs">TVs</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Vacuum cleaner">Vacuum cleaner</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Fridge">Fridge</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Ironing">Ironing</DropdownSubLink>
+                            <DropdownSubLink href="/catalog/Washing machine">Washing machine</DropdownSubLink>
                         </DropdownSubLinkWrapper>
                     )}
                 </DropdownLinkWrapper>
