@@ -94,6 +94,14 @@ export const EmailCont = styled.div`
     font-size: 1vw;
   }
 `
+export const ErrorMessages =styled.div`
+  margin-top: 1.5vw;
+  margin-left: 0.5vw;
+    color: red;
+    font-size: 1.2vw;
+  text-wrap: normal;
+  font-weight: 500;
+`
 export const Email = styled.input`
   background: white;
   border: .1vw solid #9f9f9f;
@@ -164,4 +172,8 @@ export const Name = styled.input`
   margin-top: .5vw;
   font-family: Rubik;
   font-size: 1vw;
+`
+
+export const ContainerTemp = styled.div`
+display: flex;
 `

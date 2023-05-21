@@ -3,13 +3,21 @@ let express = require('express')
 let router = express.Router();
 
 const bcrypt = require('bcrypt')
-
+const nodemailer = require('nodemailer');
 const userDTO = require('../dtos/user-dto')
 
 const {body, validationResult} = require('express-validator')
 const ApiError = require("../exeptions/apiError");
 const UserDto = require("../dtos/user-dto");
 const tokenService = require('../services/token-services')
+const transporter = nodemailer.createTransport({
+    host: process.env.Service,
+    auth: {
+        user: process.env.usermail,
+        pass: process.env.passwordmail,
+    },
+    port:465
+});
 router.get("/categories", async (req, res) => {
     const categories = await knex.withSchema("public").select("*").from("categories");
 
@@ -283,7 +291,7 @@ router.post("/registration", body('email').isEmail(), body('password').isLength(
 
         })
         if (hasDuplicates) {
-            throw ApiError.BadRequest(`Пользователь уже зарегестрирован`)
+            throw ApiError.BadRequest(`Пользователь уже зарегистрирован`)
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -302,13 +310,39 @@ router.post("/registration", body('email').isEmail(), body('password').isLength(
         const userdto = new UserDto(currentUser[0])
         const tokens = tokenService.generateTokens({...userdto})
         await tokenService.saveToken(userdto.id, tokens.refreshToken)
-
+        const activationToken = tokenService.generateTokenForEmail({ userId: userdto.id })
+        const mailOptions = {
+            from: process.env.usermail,
+            to: userdto.email,
+            subject: 'Account Activation',
+            text: `To activate your account, click on the following link: ${process.env.BASE_URL}/api/activate/${activationToken.emailToken}`,
+        };
+        await transporter.sendMail(mailOptions);
         res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
         res.send({...tokens, user: userdto})
+        res.send('Registration successful. Please check your email for activation instructions.')
     } catch (e) {
         next(e.message)
     }
 })
+router.get('/activate/:token', async (req, res, next) => {
+    try {
+        const { token } = req.params;
+
+        // Verify the activation token
+        const decodedToken = tokenService.validateRefreshToken(token)
+        const userId = decodedToken.userId;
+
+        // Update the activated status of the user
+        await knex('customers')
+            .update('activated',true)
+            .where('id', userId );
+
+        return res.redirect(process.env.CLIENT_URL)
+    } catch (error) {
+        next(error);
+    }
+});
 router.post("/login", async (req, res, next) => {
     try {
         const user = await knex
@@ -329,7 +363,7 @@ router.post("/login", async (req, res, next) => {
         res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
         res.send({...tokens, user: userdto})
     } catch (e){
-        next(e)
+        next(e.message)
     }
 })
 router.post('/logout', async (req, res, next) => {

@@ -11,7 +11,13 @@ class TokenService {
             refreshToken
         }
     }
+    generateTokenForEmail(payload) {
+        const emailToken = jwt.sign(payload, process.env.Secret_key_email)
 
+        return {
+            emailToken
+        }
+    }
     async saveToken(customerId, refreshToken) {
         const tokens = await knex
             .select('*')
@@ -37,9 +43,9 @@ class TokenService {
     }
 
 
-    validateAccessToken(token) {
+    validateToken(token) {
         try {
-            const userData = jwt.verify(token, process.env.JWT_SECRET)
+            const userData = jwt.verify(token, process.env.Secret_key_email)
             return userData
         } catch (e) {
             return null;
@@ -48,7 +54,7 @@ class TokenService {
 
     validateRefreshToken(token) {
         try {
-            const userData = jwt.verify(token, process.env.JWT_SECRET_REFRESH)
+            const userData = jwt.verify(token, process.env.Secret_key_email)
             return userData
         } catch (e) {
             return null;
