@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const DropdownWrapper = styled.div`
   position: relative;
   display: flex;
+  z-index: 5;
 `;
 export const CatalogIcon = styled.img`
 padding-right:1vw ;

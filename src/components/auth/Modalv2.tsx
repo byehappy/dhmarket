@@ -57,7 +57,7 @@ const Modal = (props: any) => {
                                 <SwapButton onClick={() => setAuthForm(true)}>Войти</SwapButton>
                             </ButtonCont>
                         </HeadCont>
-                                <RegForm/>
+                                <RegForm onClose={onClose}/>
                             </>)}
                     </ContainerItem>
                     {authForm ? <PictureRight src={Right}/> : <PictureLeft src={Left}/>}

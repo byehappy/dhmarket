@@ -15,20 +15,21 @@ import cart from '../images/cart.svg'
 import {NavLink, useNavigate} from "react-router-dom";
 import Dropdown from "../catalogHeaderButton/Catalog";
 import profile from "../images/profile.svg";
-import {BasicButton} from "../auth/Modal.style";
+import {AccountButton, BasicButton} from "../auth/Modal.style";
 import React, {useState} from "react";
 import Modal from "../auth/Modalv2";
 import {useDispatch, useSelector} from "react-redux";
 import {IUser} from "../../interfaces/BasicInterface";
-import {loginUser, logout, setAuth} from "../../actions/actions";
+import {loginUser, logout, setAdmin, setAuth} from "../../actions/actions";
 
 type CurrentUser = {
     curUser: IUser;
     isAuth: boolean;
+    isAdmin:boolean;
 }
 const HeaderComponent = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const {curUser, isAuth} = useSelector((state: CurrentUser) => state)
+    const {curUser, isAuth, isAdmin} = useSelector((state: CurrentUser) => state)
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const handleOpenModal = () => {
@@ -70,12 +71,20 @@ const HeaderComponent = () => {
                                 <UserButton onClick={() => logout().then(() => {
                                     navigate('/')
                                     dispatch(setAuth(false))
+                                    dispatch(setAdmin(false))
                                     dispatch(loginUser({} as IUser))
                                 })}>Выйти</UserButton>
                             </UserCont>
-                            <BasicButton>
-                                <Icon src={profile}/>
-                            </BasicButton>
+                            {isAdmin ?
+                                <AccountButton to={`/admin`}>
+                                    <Icon src={profile}/>
+                                </AccountButton>
+                                :
+                                <AccountButton to={`/account/${curUser.id}`}>
+                                    <Icon src={profile}/>
+                                </AccountButton>
+                            }
+
                         </>
                         :
                         <>

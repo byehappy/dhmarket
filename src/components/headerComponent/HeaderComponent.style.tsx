@@ -67,6 +67,7 @@ export const BasicButtonsContainer = styled.div`
   justify-content: flex-end;
   gap: 3vw;
   margin-left: auto;
+  align-items: center;
 `
 export const Icon = styled.img`
   float: right;

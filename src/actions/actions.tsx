@@ -1,4 +1,4 @@
-import {AuthResponse, IUser, Product, Products} from "../interfaces/BasicInterface";
+import {AuthResponse, Filter, IUser, Product, Products} from "../interfaces/BasicInterface";
 import AuthService from "../services/AuthServices";
 import axios from "axios";
 import {API_URL} from "../http";
@@ -9,7 +9,16 @@ export const productFetched = (product:Product)=>{
         payload: product
     }
 }
-
+export const FilterFetched = (filter:Filter)=>{
+    return{
+        type:'Filter_Fetched',
+        filter:filter
+    }
+}
+export const updateFilters = (filters: { [p: string]: string }) => ({
+    type: 'UPDATE_FILTERS',
+    payload: filters,
+});
 export const productsFetched = (products:Products) =>{
     return{
         type:'Products_Fetched',
@@ -19,6 +28,12 @@ export const productsFetched = (products:Products) =>{
 export const setAuth = (bool: boolean) => {
     return {
         type: 'SET_AUTH',
+        payload: bool
+    }
+}
+export const setAdmin = (bool: boolean) => {
+    return {
+        type: 'SET_ADMIN',
         payload: bool
     }
 }

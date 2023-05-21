@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import {NavLink} from "react-router-dom";
 
 interface ContainerProps {
     AuthForm: boolean;
@@ -9,6 +10,13 @@ export const BasicButton = styled.button`
   background: none;
   cursor: pointer;
   border: none;
+`
+export const AccountButton = styled(NavLink)`
+  outline: none;
+  background: none;
+  cursor: pointer;
+  border: none;
+  height: 2vw;
 `
 export const Container = styled.div<ContainerProps>`
   display: flex;
