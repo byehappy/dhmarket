@@ -9,21 +9,12 @@ import {
     TextInput,
     ArrayInput,
     required,
-    useNotify,
-    useRedirect,
 } from 'react-admin';
 
-export const ProductEdit = (props:any) => {
-    const notify = useNotify();
-    const redirect = useRedirect();
-
-    const onSuccess = (data:any) => {
-        notify('Product updated successfully');
-        redirect('list', 'products', data.id, data);
-    };
+export const ProductEdit = () => {
 
     return (
-        <Edit mutationOptions={{ onSuccess }} {...props}>
+        <Edit>
             <SimpleForm>
                 <TextInput disabled source="id" label="ID" />
                 <TextInput validate={[required()]} source="name" label="Name" />

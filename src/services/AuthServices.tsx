@@ -1,6 +1,6 @@
 import $api from "../http";
 import {AxiosResponse} from 'axios'
-import {AuthResponse} from "../interfaces/BasicInterface";
+import {AuthResponse, IUser} from "../interfaces/BasicInterface";
 
 const AuthService = () => {
     const login = async (email: string, password: string): Promise<AxiosResponse<AuthResponse>> => {
@@ -17,8 +17,30 @@ const AuthService = () => {
     const logout = async (): Promise<void> => {
         return $api.post('/logout')
     }
+    const profile = async (id: string | undefined): Promise<AxiosResponse<IUser>> =>{
+        return $api.get<IUser>(`/users/${id}`)
+    }
+    const updateProfile = async (id: string | undefined, data: Partial<IUser>): Promise<AxiosResponse<IUser>> => {
+        return $api.put<IUser>(`/users/${id}`, data);
+    }
+    const resetPassword = async (
+        resetToken: string | undefined,
+        password: string
+    ): Promise<AxiosResponse<AuthResponse>> => {
+        return $api.post<AuthResponse>(`/reset-password/${resetToken}`, {
+            password,
+        });
+    };
+    const sendReset = async (
+        email:string
+    ): Promise<AxiosResponse<AuthResponse>> => {
+        return $api.post<AuthResponse>(`/forgot-password/`, {
+            email,
+        });
+    };
 
-    return {login, registration, logout}
+
+    return {login, registration, logout,profile,updateProfile,resetPassword,sendReset}
 }
 
 export default AuthService

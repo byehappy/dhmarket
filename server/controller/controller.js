@@ -134,8 +134,7 @@ router.delete("/products/:id", async (req, res) => {
     }
 });
 router.put("/products/:id", async (req, res) => {
-    const productId = req.params.id;
-    const { name, description, price, category_id, image_url, quantity_in_stock, attributes } = req.body;
+    const { id,name, description, price, category_id, image_url, quantity_in_stock, attributes } = req.body;
 
     try {
         // Check if the product exists
@@ -143,17 +142,20 @@ router.put("/products/:id", async (req, res) => {
             .withSchema("public")
             .select("*")
             .from("products")
-            .where("id", productId)
+            .where("id", id)
             .first();
 
         if (!existingProduct) {
             return res.status(404).json({ error: "Product not found" });
         }
-
+        const processedAttributes = attributes.reduce((result, { name_attribute, value }) => {
+            result[name_attribute] = value;
+            return result;
+        }, {});
         // Update the product
         await knex.withSchema("public")
             .from("products")
-            .where("id", productId)
+            .where("id", id)
             .update({
                 name,
                 description,
@@ -161,13 +163,14 @@ router.put("/products/:id", async (req, res) => {
                 category_id,
                 image_url,
                 quantity_in_stock,
-                attributes,
+                attributes:processedAttributes,
             });
 
         res.status(200).json({ message: "Product updated successfully" });
 
     } catch (error) {
         res.status(500).json({ error: 'Failed to update product' });
+        console.log(error)
     }
 });
 router.get("/products/:id", async (req, res) => {
@@ -236,8 +239,96 @@ router.get("/customers", async (req, res) => {
     // Send the sliced customers as the response
     res.send(slicedCustomers);
 });
+router.get("/users/:id", async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const user = await knex.select("*").from("customers").where("id", userId).first();
+
+        if (!user) {
+            return res.status(404).json({ message: "Пользователь не найден" });
+        }
+
+        res.json(user);
+    } catch (error) {
+        next(error);
+    }
+});
+router.put("/users/:id", async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const { email, name, address, phone_number } = req.body;
+
+        const updatedUser = await knex("customers")
+            .where("id", userId)
+            .update({ email, name, address, phone_number })
+            .returning("*");
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "Пользователь не найден" });
+        }
+
+        res.json(updatedUser);
+    } catch (error) {
+        next(error);
+    }
+});
+router.post('/forgot-password', async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        // Проверка, что пользователь с таким email существует
+        const user = await knex('customers').where({ email }).first();
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Генерация токена сброса пароля
+        const resetToken = tokenService.generateTokenForReset({ userId: user.id });
+
+        // Отправка ссылки на сброс пароля по электронной почте
+        const mailOptions = {
+            from: process.env.usermail,
+            to: email,
+            subject: 'Password Reset',
+            text: `To reset your password, click on the following link: ${process.env.CLIENT_URL}/reset-password/${resetToken.resetToken}`,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.send('Password reset link has been sent to your email.');
+    } catch (e) {
+        next(e.message);
+    }
+});
+router.post('/reset-password/:resetToken', async (req, res, next) => {
+    try {
+        const { resetToken } = req.params;
+        const { password } = req.body;
+        // Расшифровка токена сброса пароля
+        const decodedToken = tokenService.validateTokenReset(resetToken)
+
+        // Проверка, что токен является действительным
+        if (!decodedToken.userId) {
+            throw new Error('Invalid reset token');
+        }
+
+        // Генерация соли для хеширования пароля
+        const salt = await bcrypt.genSalt(10);
+
+        // Хеширование нового пароля с использованием соли
+        const hashedPassword = await bcrypt.hash(password, salt);
 
 
+        // Обновление пароля пользователя в базе данных
+        await knex('customers')
+            .where('id',decodedToken.userId )
+            .update({ password: hashedPassword });
+
+        return res.send('Password has been successfully reset.')
+    } catch (error) {
+        next(error);
+    }
+});
 router.get("/categories/:category_name/products", async (req, res) => {
     const { category_name } = req.params;
     const filtersStr = req.query.filters; // Получение строки фильтров из запроса
@@ -330,7 +421,7 @@ router.get('/activate/:token', async (req, res, next) => {
         const { token } = req.params;
 
         // Verify the activation token
-        const decodedToken = tokenService.validateRefreshToken(token)
+        const decodedToken = tokenService.validateToken(token)
         const userId = decodedToken.userId;
 
         // Update the activated status of the user
@@ -378,7 +469,7 @@ router.post('/logout', async (req, res, next) => {
 })
 router.get('/refresh', async (req, res, next) => {
     try {
-        const {refreshToken} = req.cookies;
+        const refreshToken = req.cookies.refreshToken;
 
         if (!refreshToken) {
             throw ApiError.UnauthorizedError()

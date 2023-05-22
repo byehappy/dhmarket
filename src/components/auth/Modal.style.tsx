@@ -177,3 +177,23 @@ export const Name = styled.input`
 export const ContainerTemp = styled.div`
 display: flex;
 `
+export const Reset = styled.div`
+  margin-top: 2vw;
+  margin-left: 1vw;
+  font-family: Arimo;
+`
+export const Denied = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background: black;
+  color: white;
+  font-family: Rubik;
+  font-size: 1.5vw;
+  margin-top: 1.6vw;
+  margin-left: 2vw;
+  width: 10vw;
+  height: 2.8vw;
+  border-radius: 1vw;
+`

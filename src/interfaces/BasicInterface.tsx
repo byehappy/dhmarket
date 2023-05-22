@@ -42,6 +42,7 @@ export interface IUser {
     id: string;
     name: string;
     address: string;
+    phone_number:string;
 }
 export interface Categories{
     category_id:number;

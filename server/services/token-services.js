@@ -12,10 +12,17 @@ class TokenService {
         }
     }
     generateTokenForEmail(payload) {
-        const emailToken = jwt.sign(payload, process.env.Secret_key_email)
+        const emailToken = jwt.sign(payload, process.env.Secret_key_email,{expiresIn:'2h'})
 
         return {
             emailToken
+        }
+    }
+    generateTokenForReset(payload) {
+        const resetToken = jwt.sign(payload, process.env.Secret_key_reset,{expiresIn:'2h'})
+
+        return {
+            resetToken
         }
     }
     async saveToken(customerId, refreshToken) {
@@ -51,10 +58,18 @@ class TokenService {
             return null;
         }
     }
+    validateTokenReset(token) {
+        try {
+            const userData = jwt.verify(token, process.env.Secret_key_reset)
+            return userData
+        } catch (e) {
+            return null;
+        }
+    }
 
     validateRefreshToken(token) {
         try {
-            const userData = jwt.verify(token, process.env.Secret_key_email)
+            const userData = jwt.verify(token, process.env.JWT_SECRET_REFRESH)
             return userData
         } catch (e) {
             return null;

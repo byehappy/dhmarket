@@ -10,12 +10,16 @@ import {checkAuth, loginUser, setAdmin, setAuth} from "./actions/actions";
 import CatalogProducts from "./components/catalogProducts/CatalogProducts";
 import AdminPanel from "./components/AdminPanel/AdminPanel";
 import {IUser} from "./interfaces/BasicInterface";
+import Profile from "./components/profile/Profile";
+import NotFound from "./components/Pages/NotFound";
+import ResetPasswordForm from "./components/resetPasswordForm/ResetPasswordForm";
 function App() {
     const dispatch = useDispatch()
     type CurrentUser = {
         curUser: IUser;
+        isAuth:boolean
     }
-    const {curUser} = useSelector((state:CurrentUser) => state);
+    const {curUser,isAuth} = useSelector((state:CurrentUser) => state);
     useEffect(() => {
         if (localStorage.getItem('token')) {
             checkAuth().then(data => {
@@ -37,8 +41,15 @@ function App() {
                     <Route path={'/blog'} element={<div/>}/>
                     <Route path={'/news'} element={<div/>}/>
                     <Route path={'/About-us'} element={<div/>}/>
+                    <Route path={'/reset-password/:resetToken'} element={<ResetPasswordForm/>}/>
+                    <Route path='*' element={<NotFound />} />
                     {curUser.admin ? (
                         <Route path="/admin/*" element={<AdminPanel />} />
+                    ) : (
+                        <></>
+                    )}
+                    {isAuth ? (
+                        <Route path="/account/:id" element={<Profile/>} />
                     ) : (
                         <></>
                     )}
