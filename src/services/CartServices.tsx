@@ -6,7 +6,7 @@ const CartServices = {
         return $api.get(`/cart/${customerId}`);
     },
 
-    addToCart: (customerId: string, productId: number): Promise<AxiosResponse<any>> => {
+    addToCart: (customerId: string, productId: number | string | undefined): Promise<AxiosResponse<any>> => {
         return $api.post(`/cart/${customerId}/${productId}`);
     },
 

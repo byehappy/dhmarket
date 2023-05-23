@@ -1,8 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import ProductsService from '../../services/ProductServices';
-import {Products} from '../../interfaces/BasicInterface';
+import {IUser, Products} from '../../interfaces/BasicInterface';
 import styled from 'styled-components';
+import CartServices from "../../services/CartServices";
+import {useSelector} from "react-redux";
+import {Text} from "../cardProduct/CardProduct.style";
 
 const ProductCardContainer = styled.div`
   display: flex;
@@ -10,7 +13,7 @@ const ProductCardContainer = styled.div`
   flex-direction: column;
 `;
 const Container = styled.div`
-  display:flex;
+  display: flex;
   flex-direction: row;
   justify-content: space-evenly;
   margin-bottom: 1vw;
@@ -66,11 +69,30 @@ const AttributeItem = styled.li`
   margin: 1vw;
 `;
 
+type CurrentUser = {
+    curUser: IUser;
+}
 const ProductCard = () => {
     const {id} = useParams();
+    const [addedToCart, setAddedToCart] = useState(false);
     const {getProduct} = ProductsService();
+    const {curUser} = useSelector((state: CurrentUser) => state)
     const [product, setProduct] = useState<Products>();
+    const addToCart = () => {
+        const customerId = curUser.id
+        const productId = id;
 
+        CartServices.addToCart(customerId, productId)
+            .then(response => {
+                // Handle success if needed
+                console.log("Product added to cart:", response.data);
+                setAddedToCart(true);
+            })
+            .catch(error => {
+                // Handle error if needed
+                console.error("Failed to add product to cart:", error);
+            });
+    };
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -94,7 +116,11 @@ const ProductCard = () => {
                 <ProductInfoContainer>
                     <ProductTitle>{product.name}</ProductTitle>
                     <ProductPrice>Price: {product.price}</ProductPrice>
-                    <BuyButton>Buy</BuyButton>
+                    {addedToCart ? (
+                        <BuyButton disabled><Text>Added to Cart</Text></BuyButton>
+                    ) : (
+                        <BuyButton onClick={addToCart}>Buy</BuyButton>
+                    )}
                 </ProductInfoContainer>
                 <ProductImage src={product.image_url} alt={product.name}/>
             </Container>
