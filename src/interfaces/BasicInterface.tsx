@@ -14,9 +14,12 @@ export type Products = {
     id: number;
     name:string;
     price:number;
+    attributes:object;
     rating: number;
     votes: number;
     image_url:string;
+    description:string;
+    quantity:number;
 }
 
 export type states = {

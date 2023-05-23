@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {NavLink} from "react-router-dom";
+import {NavLink,Link} from "react-router-dom";
 
 interface ContainerProps {
     AuthForm: boolean;
@@ -196,4 +196,9 @@ export const Denied = styled.button`
   width: 10vw;
   height: 2.8vw;
   border-radius: 1vw;
+`
+export const ModalAuthVKButton = styled(Link)`
+  border: none;
+  cursor: pointer;
+  margin-top: 1vw;
 `

@@ -10,6 +10,8 @@ const {body, validationResult} = require('express-validator')
 const ApiError = require("../exeptions/apiError");
 const UserDto = require("../dtos/user-dto");
 const tokenService = require('../services/token-services')
+const passport = require("passport");
+const VKontakteStrategy = require("passport-vkontakte").Strategy;
 const transporter = nodemailer.createTransport({
     host: process.env.Service,
     auth: {
@@ -331,29 +333,60 @@ router.post('/reset-password/:resetToken', async (req, res, next) => {
 });
 router.get("/categories/:category_name/products", async (req, res) => {
     const { category_name } = req.params;
-    const filtersStr = req.query.filters; // Получение строки фильтров из запроса
+    const filtersStr = req.query.filters; // Get filters string from the request
 
-    let query = knex
-        .withSchema("public")
-        .select("*")
-        .from("products")
-        .innerJoin("categories", "products.category_id", "categories.id")
-        .where("categories.category_name", category_name);
+    try {
+        // First query: Retrieve the category ID based on the category name
+        const categoryId = await knex
+            .select("id")
+            .from("categories")
+            .where("category_name", category_name)
+            .first();
 
-    // Преобразование строки фильтров в объект
-    if (filtersStr) {
-        const filtersObj = JSON.parse(decodeURIComponent(filtersStr));
+        if (!categoryId) {
+            return res.status(404).send({ message: "Category not found" });
+        }
 
-        // Применение фильтров на столбец attributes
-        Object.keys(filtersObj).forEach((key) => {
-            const value = filtersObj[key];
-            query = query.whereRaw(`attributes->>'${key}' = '${value}'`);
-        });
+        // Second query: Fetch the products belonging to the category ID
+        let query = knex
+            .select("*")
+            .from("products")
+            .where("products.category_id", categoryId.id);
+
+        // Apply filters on the 'attributes' column
+        if (filtersStr) {
+            const filtersObj = JSON.parse(decodeURIComponent(filtersStr));
+            Object.keys(filtersObj).forEach((key) => {
+                const value = filtersObj[key];
+                query = query.whereRaw(`attributes->>'${key}' = '${value}'`);
+            });
+        }
+
+        const products = await query;
+
+        res.send(products);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Internal server error" });
     }
+});
 
-    const products = await query;
 
-    res.send(products);
+router.get('/product/:id', async (req, res, next) => {
+    try {
+        const productId = req.params.id;
+
+        // Получите данные товара из базы данных по его идентификатору
+        const product = await knex('products').where('id', productId).first();
+
+        if (!product) {
+            throw new Error('Product not found');
+        }
+
+        res.json(product);
+    } catch (error) {
+        next(error);
+    }
 });
 
 
@@ -534,6 +567,306 @@ router.get('/attributes/:categoryName', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+passport.use(
+    new VKontakteStrategy(
+        {
+            clientID: process.env.VK_CLIENT_ID,
+            clientSecret: process.env.VK_SECRET_KEY,
+            callbackURL: "http://localhost:3001/api/auth/vkontakte/callback", //где найти url на случаи успеха и неудачи
+            scope: ["email"],
+            profileFields: ['email'],
+        },
+        async function (accessToken, refreshToken, params, profile, done) {
+            try {
+                const user = await knex('customers').select('*').where('id', profile.id)
+
+                if (!user[0]) {
+
+                    const hashPassword = await bcrypt.hash('PawosrdKvUnFuer', 3)
+
+                    await knex('customers').insert(
+                        {
+                            id: profile.id,
+                            name: profile.username,
+                            email: profile.emails[0].value,
+                            password: hashPassword,
+                            activated:true
+                        }
+                    )
+
+                    const currentUser = await knex
+                        .select('email', 'id')
+                        .from('customers')
+                        .where('id', profile.id)
+                    const userdto = new userDTO(currentUser[0])
+                    const tokens = tokenService.generateTokens({...userdto})
+                    await tokenService.saveToken(userdto.id, tokens.refreshToken)
+                }
+
+                return done(null, profile);
+            }
+            catch (err) {
+                console.log(err);
+                return done(err)
+            }
+        }
+    )
+);
+
+passport.serializeUser(function (user, done) {
+    console.log("SERIALIZE", user);
+    done(null, JSON.stringify(user));
+});
+
+passport.deserializeUser(function (data, done) {
+    console.log("DESERIALIZE", data);
+    done(null, JSON.parse(data));
+});
+
+router.get(
+    "/auth/vkontakte/callback",
+    passport.authenticate("vkontakte", {
+        successRedirect: "/api/vkuser", //направить после успеха
+        failureRedirect: "http://localhost:3000", //направить после неудачи
+    })
+);
+
+router.get("/auth/vkontakte", passport.authenticate("vkontakte"));
+
+router.get("/vkuser", async function (req, res) { //инфа о пользователе
+    try {
+
+        res.redirect(`http://localhost:3000/vk-login/${req.user.id}`)
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).send("Server Error");
+    }
+
+});
+
+router.get("/vk-auth/:id", async (req, res) => {
+    try {
+        const user = await knex('customers').select('*').where('id', req.params.id)
+
+        if (!user[0]) {
+            throw new Error()
+        }
+
+        const userdto = new userDTO(user[0])
+        const tokens = tokenService.generateTokens({...userdto})
+        await tokenService.saveToken(userdto.id, tokens.refreshToken)
+
+        res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
+        res.send({...tokens, user: userdto})
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+router.get("/cart/:customer_id", async (req, res) => {
+    const { customer_id } = req.params;
+
+    try {
+        const cartItems = await knex
+            .select(
+                "order_items.quantity_ordered",
+                "order_items.price",
+                "products.*"
+            )
+            .from("order_items")
+            .join("products", "order_items.product_id", "products.id")
+            .join("orders", "order_items.order_id", "orders.id")
+            .where("orders.customer_id", customer_id)
+
+        res.send(cartItems);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Internal server error" });
+    }
+});
+
+router.delete("/cart/:customer_id/:product_id", async (req, res) => {
+    const { customer_id, product_id } = req.params;
+
+    try {
+        // Get the order_ids for the customer's cart orders
+        const orderIds = await knex("orders")
+            .select("id")
+            .where("customer_id", customer_id)
+            .pluck('id')
+
+        // Delete the product from the order_items table
+        await knex("order_items")
+            .whereIn("order_id", orderIds)
+            .where("product_id", product_id)
+            .del();
+
+        // Check if the customer has any remaining items in the cart
+        const remainingItems = await knex("order_items")
+            .whereIn("order_id", orderIds)
+            .first();
+
+        if (!remainingItems) {
+            // Delete the order records if there are no remaining items in order_items
+            await knex("orders")
+                .whereIn("id", orderIds)
+                .del();
+        }
+
+        res.send("Product removed from cart successfully.");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("An error occurred while removing the product from the cart.");
+    }
+});
+
+router.post("/cart/:customer_id/:product_id", async (req, res) => {
+    const { customer_id, product_id } = req.params;
+
+    try {
+        // Get the product price and quantity
+        const product = await knex("products")
+            .select("price")
+            .where("id", product_id)
+            .first();
+
+        if (!product) {
+            return res.status(404).send("Product not found.");
+        }
+
+        const { price } = product;
+        const quantity_ordered = 1;
+
+        // Check if the customer already has a cart order
+        const existingOrder = await knex("orders")
+            .where("customer_id", customer_id)
+            .where("status", "cart")
+            .first();
+
+        if (existingOrder) {
+            // If the customer has a cart order, update the total_price and add the product to the order_items table
+            const total_price = Number(existingOrder.total_price) + price * quantity_ordered;
+
+            await knex("orders")
+                .where("id", existingOrder.id)
+                .update({ total_price });
+
+            await knex("order_items").insert({
+                order_id: existingOrder.id,
+                product_id,
+                quantity_ordered,
+                price,
+            });
+        } else {
+            // If the customer does not have a cart order, create a new order and add the product
+            const total_price = price * quantity_ordered;
+
+            const [order_id] = await knex("orders")
+                .returning("id")
+                .insert({
+                    customer_id,
+                    status: "cart",
+                    date_ordered: knex.fn.now(),
+                    total_price,
+                });
+
+            await knex("order_items").insert({
+                order_id,
+                product_id,
+                quantity_ordered,
+                price,
+            });
+        }
+
+        res.send("Product added to cart successfully.");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("An error occurred while adding the product to the cart.");
+    }
+});
+
+router.put("/cart/:customer_id/:product_id", async (req, res) => {
+    const { customer_id, product_id } = req.params;
+    const { quantity } = req.body;
+
+    try {
+        // Get the product price
+        const product = await knex("products")
+            .select("price")
+            .where("id", product_id)
+            .first();
+
+        if (!product) {
+            return res.status(404).send("Product not found.");
+        }
+
+        const { price } = product;
+
+        // Update the quantity and total_price in the order_items table
+        await knex("order_items")
+            .whereExists(function () {
+                this.select("id")
+                    .from("orders")
+                    .whereRaw("orders.id = order_items.order_id")
+                    .where("orders.customer_id", customer_id)
+                    .where("orders.status", "cart");
+            })
+            .where("product_id", product_id)
+            .update({
+                quantity_ordered: quantity,
+                price: knex.raw(`quantity_ordered * ${price}`),
+            });
+
+        // Recalculate the total_price in the orders table
+        await knex("orders")
+            .where("customer_id", customer_id)
+            .where("status", "cart")
+            .update({
+                total_price: knex.raw(`(
+          SELECT SUM(price)
+          FROM order_items
+          WHERE order_items.order_id = orders.id
+        )`),
+            });
+
+        res.send("Quantity updated successfully.");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("An error occurred while updating the quantity.");
+    }
+});
+
+router.delete("/cart/:customer_id", async (req, res) => {
+    const { customer_id } = req.params;
+
+    try {
+        // Delete all order items associated with the customer's cart
+        await knex("order_items")
+            .whereIn("order_id", function () {
+                this.select("id")
+                    .from("orders")
+                    .where("customer_id", customer_id)
+                    .where("status", "cart");
+            })
+            .del();
+
+        // Delete the cart orders for the customer
+        await knex("orders")
+            .where("customer_id", customer_id)
+            .where("status", "cart")
+            .del();
+
+        res.send("Cart cleared successfully.");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("An error occurred while clearing the cart.");
+    }
+});
+
+
+
 
 
 module.exports = router;

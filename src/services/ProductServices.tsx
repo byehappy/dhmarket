@@ -16,7 +16,10 @@ const ProductsService =() =>{
 
         return $api.get<Products>(url);
     };
-    return {getProducts,getProductsFromCategory}
+    const getProduct = async (id: string | undefined): Promise<AxiosResponse<Products>> =>{
+        return $api.get<Products>(`/product/${id}`)
+    }
+    return {getProducts,getProductsFromCategory,getProduct}
 }
 
 export default ProductsService;

@@ -38,9 +38,12 @@ const AuthService = () => {
             email,
         });
     };
+    const takeVKLogin = async (id: string): Promise<AxiosResponse<any>> => {
+        return $api.get<any>(`/vk-auth/${id}`)
+    }
 
 
-    return {login, registration, logout,profile,updateProfile,resetPassword,sendReset}
+    return {login, registration, logout,profile,updateProfile,resetPassword,sendReset,takeVKLogin}
 }
 
 export default AuthService

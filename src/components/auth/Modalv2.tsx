@@ -8,14 +8,14 @@ import {
     Logo,
     PictureRight,
     SwapButton,
-    PictureLeft
+    PictureLeft, ModalAuthVKButton
 } from "./Modal.style";
 import Right from '../images/right-picture.svg'
 import Left from '../images/left-picture.svg'
 import logo from '../images/logo_for_auth.svg'
 import AuthForm from "./authForm";
 import RegForm from "./regForm";
-
+import vk from '../images/vk.svg'
 const modalRootElement: any = document.querySelector('#portal')
 
 const Modal = (props: any) => {
@@ -46,6 +46,9 @@ const Modal = (props: any) => {
                             <ButtonCont>
                                 Нет аккаунта?
                                 <SwapButton onClick={() => setAuthForm(false)}>Зарегистрироваться</SwapButton>
+                                <ModalAuthVKButton to={'http://localhost:3001/api/auth/vkontakte'}>
+                                    <img src={vk}/>
+                                </ModalAuthVKButton>
                             </ButtonCont>
                         </HeadCont>
                             <AuthForm onClose={onClose}/>
@@ -55,6 +58,9 @@ const Modal = (props: any) => {
                             <ButtonCont>
                                 Есть аккаунт?
                                 <SwapButton onClick={() => setAuthForm(true)}>Войти</SwapButton>
+                                <ModalAuthVKButton to={'http://localhost:3001/api/auth/vkontakte'}>
+                                    <img src={vk}/>
+                                </ModalAuthVKButton>
                             </ButtonCont>
                         </HeadCont>
                                 <RegForm onClose={onClose}/>

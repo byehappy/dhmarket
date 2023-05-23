@@ -10,7 +10,7 @@ import {
     PasswordCont,
     Submit
 } from "./ResetPasswordForm.style";
-import AuthService from "../../services/AuthServices";
+import AuthService from "../../../services/AuthServices";
 import {useNavigate,useParams} from "react-router-dom";
 
 const ResetPasswordForm = () => {
